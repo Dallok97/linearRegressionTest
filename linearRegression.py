@@ -25,9 +25,9 @@ print('Train score : ', model.score(train_features, train_rssi))
 
 print('Test score : ', model.score(test_features, test_rssi))
 
-newRssi1 = np.array([83])
-newRssi2 = np.array([78])
-newRssi3 = np.array([89])
+newRssi1 = np.array([-83])
+newRssi2 = np.array([-78])
+newRssi3 = np.array([-89])
 
 newRssis = np.array([newRssi1, newRssi2, newRssi3])
 
