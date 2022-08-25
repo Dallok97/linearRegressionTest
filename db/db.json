@@ -1,0 +1,80 @@
+{
+  "device": {},
+  "area": {
+    "init": [],
+    "enter": [],
+    "work": [
+      {
+        "macAddress": "00:c0:b1:c0:47:ee",
+        "uuid": "CCE99BED-E080-04C4-1A91-1A1A29B64111",
+        "timestamp": "20220824100100",
+        "rssi": 71,
+        "type": "area"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:47:de",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C047DE",
+        "timestamp": "20220824100057",
+        "rssi": 75,
+        "type": "area"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:47:dd",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C047DD",
+        "timestamp": "20220824100058",
+        "rssi": 71,
+        "type": "area"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:47:dc",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C047DC",
+        "timestamp": "20220824100042",
+        "rssi": 89,
+        "type": "area"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:47:db",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C047DB",
+        "timestamp": "20220824100051",
+        "rssi": 95,
+        "type": "area"
+      }
+    ],
+    "quit": []
+  },
+  "vehicle": {
+    "init": [],
+    "enter": [],
+    "work": [
+      {
+        "macAddress": "00:c0:b1:c0:2a:e2",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C02AE2",
+        "timestamp": "20220824100100",
+        "rssi": 72,
+        "type": "vehicle"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:2a:e9",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C02AE9",
+        "timestamp": "20220824100100",
+        "rssi": 72,
+        "type": "vehicle"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:2a:f1",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C02AF1",
+        "timestamp": "20220824100059",
+        "rssi": 68,
+        "type": "vehicle"
+      },
+      {
+        "macAddress": "00:c0:b1:c0:2a:f6",
+        "uuid": "CCE99BED-E080-04C4-1A91-00C0B1C02AF6",
+        "timestamp": "20220824100100",
+        "rssi": 67,
+        "type": "vehicle"
+      }
+    ],
+    "quit": []
+  }
+}

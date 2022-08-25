@@ -1,44 +1,83 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
+import json
+import time
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-df_data = pd.read_csv('data.csv')
+def logisticRegression():
+    df_data = pd.read_csv('data.csv')
 
-rssi = df_data[['Rssi']]
-riding = df_data['Riding']
+    rssi = df_data[['Rssi']].values
+    riding = df_data['Riding'].values
 
-train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding)
+    train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding)
 
-scaler = StandardScaler()
-train_features = scaler.fit_transform(train_features)
-test_features = scaler.transform(test_features)
+    scaler = StandardScaler()
+    train_features = scaler.fit_transform(train_features)
+    test_features = scaler.transform(test_features)
 
-model = LogisticRegression()
-model.fit(train_features, train_rssi)
+    model = LogisticRegression()
+    model.fit(train_features, train_rssi)
 
-print('Train score : ', model.score(train_features, train_rssi))
+    print('Train score : ', model.score(train_features, train_rssi))
+    print('Test score : ', model.score(test_features, test_rssi))
 
-print('Test score : ', model.score(test_features, test_rssi))
+    return scaler, model
 
-newRssi1 = np.array([-83])
-newRssi2 = np.array([-78])
-newRssi3 = np.array([-89])
+def discriminateWorker(scaler, model):
 
-newRssis = np.array([newRssi1, newRssi2, newRssi3])
+    workData = dict()
+    workDataKeys = ["riding", "notRiding"]
+    workDataValues = [[]]*2
+    ridingData = []
+    notRidingData = []
+    
+    loadFilePath = './db/db.json'
 
-newRssis = scaler.transform(newRssis)
+    with open(loadFilePath, 'r') as f:
+        jsonData = json.load(f)
 
-print(model.predict(newRssis))
+    print('db.json open ')
 
-print(model.predict_proba(newRssis))
+    vehicleWorkLength = len(jsonData["vehicle"]["work"])
+    vehicleWorkDataRssi = []
+    ridingPredict = []
+    newRssi = ()
 
-x = df_data['Rssi']
-y = df_data['Riding']
+    for i in range(0, vehicleWorkLength):
+        vehicleWorkData = jsonData["vehicle"]["work"][i]
+        vehicleWorkDataRssi.append([vehicleWorkData['rssi']])
 
-sns.regplot(x = x, y = y, data = df_data, logistic = True, ci = None, scatter_kws = {'color': 'black'}, line_kws = {'color': 'red'})
+        newRssi = np.array([vehicleWorkDataRssi[i]])
+        newRssi = scaler.transform(newRssi)
 
+        ridingPredict.append(model.predict(newRssi))
+
+        if(ridingPredict[i] == 1):
+            ridingData.append(jsonData["vehicle"]["work"][i])
+            workDataValues[0] = ridingData
+        elif(ridingPredict[i] == 0):
+            notRidingData.append(jsonData["vehicle"]["work"][i])
+            workDataValues[1] = notRidingData
+
+        workData = dict(zip(workDataKeys, workDataValues))
+
+    writeFilePath = './db/work.json'
+
+    with open(writeFilePath, 'w', encoding = 'utf-8') as makeFile:
+        json.dump(workData, makeFile, ensure_ascii = False, indent = '\t')
+
+    print('work.json write')
+    print('time sleep 10sec')
+    time.sleep(10)
+
+def main():
+    scaler, model = logisticRegression()
+    while(1):
+        discriminateWorker(scaler, model)
+
+if __name__ == "__main__":
+	main()
