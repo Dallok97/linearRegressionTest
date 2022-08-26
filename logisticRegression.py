@@ -27,7 +27,7 @@ def logisticRegression():
 
     return scaler, model
 
-def discriminateWorker(scaler, model):
+def identifyWorker(scaler, model):
 
     workData = dict()
     workDataKeys = ["riding", "notRiding"]
@@ -77,7 +77,7 @@ def discriminateWorker(scaler, model):
 def main():
     scaler, model = logisticRegression()
     while(1):
-        discriminateWorker(scaler, model)
+        identifyWorker(scaler, model)
 
 if __name__ == "__main__":
 	main()
