@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 def logisticRegression():
-    df_data = pd.read_csv('data.csv')
+    df_data = pd.read_csv('./logisticRegressionTest/db/data.csv')
 
     rssi = df_data[['Rssi']].values
     riding = df_data['Riding'].values
@@ -35,7 +35,7 @@ def identifyWorker(scaler, model):
     ridingData = []
     notRidingData = []
     
-    loadFilePath = './db/db.json'
+    loadFilePath = './logisticRegressionTest/db/db.json'
 
     with open(loadFilePath, 'r') as f:
         jsonData = json.load(f)
@@ -65,7 +65,7 @@ def identifyWorker(scaler, model):
 
         workData = dict(zip(workDataKeys, workDataValues))
 
-    writeFilePath = './db/work.json'
+    writeFilePath = './logisticRegressionTest/db/work.json'
 
     with open(writeFilePath, 'w', encoding = 'utf-8') as makeFile:
         json.dump(workData, makeFile, ensure_ascii = False, indent = '\t')
