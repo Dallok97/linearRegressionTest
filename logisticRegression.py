@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import json
 import time
+import csv
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -13,13 +14,13 @@ def logisticRegression():
     rssi = df_data[['Rssi']].values
     riding = df_data['Riding'].values
 
-    train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding)
+    train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding, test_size = 0.30, random_state = 101)
 
     scaler = StandardScaler()
     train_features = scaler.fit_transform(train_features)
     test_features = scaler.transform(test_features)
 
-    model = LogisticRegression()
+    model = LogisticRegression(solver = 'saga')
     model.fit(train_features, train_rssi)
 
     print('Train score : ', model.score(train_features, train_rssi))
@@ -73,6 +74,32 @@ def identifyWorker(scaler, model):
     print('work.json write')
     print('time sleep 10sec')
     time.sleep(10)
+
+def dataGet():
+
+    time.sleep(60) ## wait for 1 minute to start
+
+    vehicleWorkData = []
+    vehicleWorkRssi = []
+    rssi = []
+
+    readDataPath = './logisticRegressionTest/db/db.json'
+    dataFilePath = './logisticRegressionTest/db/data.csv'
+
+    with open(readDataPath, 'r', encoding = 'utf-8') as readData:
+        scanData = json.load(readData)
+
+    vehicleWorkLength = len(scanData["vehicle"]["work"])
+
+    for i in range(vehicleWorkLength):
+        vehicleWorkData = scanData["vehicle"]["work"][i]
+        vehicleWorkRssi.append(vehicleWorkData['rssi'])
+        rssi.append(-(vehicleWorkRssi[i]))
+
+        file = open(dataFilePath,'a', newline='')
+        writeFile = csv.writer(file)
+        writeFile.writerow([rssi[i], 1])
+        file.close()
 
 def main():
     scaler, model = logisticRegression()
