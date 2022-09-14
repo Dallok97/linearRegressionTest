@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import json
 import time
 import csv
+
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -101,8 +103,18 @@ def dataGet():
         writeFile.writerow([rssi[i], 1])
         file.close()
 
+def drawGraph():
+
+    df_data = pd.read_csv('./logisticRegressionTest/db/data.csv')
+
+    x = df_data['Rssi'].values
+    y = df_data['Riding'].values
+
+    sns.regplot(x = x, y = y, data = df_data, logistic = True, ci = None, scatter_kws = {'color': 'black'}, line_kws = {'color': 'red'})
+
 def main():
     scaler, model = logisticRegression()
+    drawGraph()
     while(1):
         identifyWorker(scaler, model)
 
