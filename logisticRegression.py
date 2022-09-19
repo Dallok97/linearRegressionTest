@@ -79,7 +79,7 @@ def identifyWorker(scaler, model):
 
 def dataGet():
 
-    time.sleep(60) ## wait for 1 minute to start
+    time.sleep(50) ## wait for 1 minute to start
 
     vehicleWorkData = []
     vehicleWorkRssi = []
