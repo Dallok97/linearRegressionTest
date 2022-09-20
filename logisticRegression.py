@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 def logisticRegression():
     df_data = pd.read_csv('./logisticRegressionTest/db/data.csv')
 
-    rssi = df_data[['Rssi']].values
+    rssi = (df_data[['Rssi']].values)*(-1)
     riding = df_data['Riding'].values
 
     train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding, test_size = 0.30, random_state = 101)
@@ -22,7 +22,7 @@ def logisticRegression():
     train_features = scaler.fit_transform(train_features)
     test_features = scaler.transform(test_features)
 
-    model = LogisticRegression(solver = 'saga')
+    model = LogisticRegression(solver = 'liblinear', max_iter = 3000)
     model.fit(train_features, train_rssi)
 
     print('Train score : ', model.score(train_features, train_rssi))
@@ -79,7 +79,8 @@ def identifyWorker(scaler, model):
 
 def dataGet():
 
-    time.sleep(50) ## wait for 1 minute to start
+    print('Wait for 50sec to start dataGet')
+    time.sleep(50) 
 
     vehicleWorkData = []
     vehicleWorkRssi = []
@@ -90,7 +91,7 @@ def dataGet():
 
     with open(readDataPath, 'r', encoding = 'utf-8') as readData:
         scanData = json.load(readData)
-
+    
     vehicleWorkLength = len(scanData["vehicle"]["work"])
 
     for i in range(vehicleWorkLength):
@@ -102,21 +103,14 @@ def dataGet():
         writeFile = csv.writer(file)
         writeFile.writerow([rssi[i], 1])
         file.close()
-
-def drawGraph():
-
-    df_data = pd.read_csv('./logisticRegressionTest/db/data.csv')
-
-    x = df_data['Rssi'].values
-    y = df_data['Riding'].values
-
-    sns.regplot(x = x, y = y, data = df_data, logistic = True, ci = None, scatter_kws = {'color': 'black'}, line_kws = {'color': 'red'})
+    
+    print('close dataGet')
 
 def main():
     scaler, model = logisticRegression()
-    drawGraph()
     while(1):
         identifyWorker(scaler, model)
+        dataGet()
 
 if __name__ == "__main__":
 	main()
