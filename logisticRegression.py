@@ -1,33 +1,65 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import json
 import time
+import csv
+import matplotlib.pyplot as plt
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-def logisticRegression():
-    df_data = pd.read_csv('data.csv')
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.model_selection import GridSearchCV
 
-    rssi = df_data[['Rssi']].values
-    riding = df_data['Riding'].values
+df_data = pd.read_csv('./logisticRegressionTest/db/data.csv')
 
-    train_features, test_features, train_rssi, test_rssi = train_test_split(rssi, riding)
+print('Data Shape :', df_data.shape)
 
-    scaler = StandardScaler()
-    train_features = scaler.fit_transform(train_features)
-    test_features = scaler.transform(test_features)
+rssi = (df_data[['Rssi']].values)*(-1)
+riding = df_data['Riding'].values
 
-    model = LogisticRegression()
-    model.fit(train_features, train_rssi)
+X_train, X_test, Y_train, Y_test = train_test_split(rssi, riding, test_size = 0.3, random_state = 101)
 
-    print('Train score : ', model.score(train_features, train_rssi))
-    print('Test score : ', model.score(test_features, test_rssi))
+scaler = StandardScaler()
 
-    return scaler, model
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-def identifyWorker(scaler, model):
+model = LogisticRegression(solver = 'liblinear', max_iter = 3000, C = 0.1)
+model.fit(X_train, Y_train)
+
+print('Train data score :', model.score(X_train, Y_train))
+print('Test data score :', model.score(X_test, Y_test))
+
+
+def modelScore():
+    
+    Y_pred = model.predict(X_test)
+
+    print('confusion matrix = \n', confusion_matrix(y_true = Y_test, y_pred = Y_pred))
+    print('accuracy = ', accuracy_score(y_true = Y_test, y_pred = Y_pred))
+    print('precision = ', precision_score(y_true = Y_test, y_pred = Y_pred))
+    print('recall = ', recall_score(y_true = Y_test, y_pred = Y_pred))
+    print('f1 score = ', f1_score(y_true = Y_test, y_pred = Y_pred))
+
+    Y_score = model.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, thresholds = roc_curve(y_true = Y_test, y_score = Y_score)
+
+    plt.plot(fpr, tpr, label = 'roc curve (area = %0.3f)' % auc(fpr, tpr))
+    plt.plot([0, 1], [0, 1], linestyle='--', label = 'random')
+    plt.plot([0, 0, 1], [0, 1, 1], linestyle='--', label = 'ideal')
+    plt.legend()
+    plt.xlabel('false positive rate')
+    plt.ylabel('true positive rate')
+    plt.show()
+
+    print('auc = ', roc_auc_score(y_true = Y_test, y_score = Y_score))
+
+def identifyWorker():
 
     workData = dict()
     workDataKeys = ["riding", "notRiding"]
@@ -35,7 +67,7 @@ def identifyWorker(scaler, model):
     ridingData = []
     notRidingData = []
     
-    loadFilePath = './db/db.json'
+    loadFilePath = './logisticRegressionTest/db/db.json'
 
     with open(loadFilePath, 'r') as f:
         jsonData = json.load(f)
@@ -65,7 +97,7 @@ def identifyWorker(scaler, model):
 
         workData = dict(zip(workDataKeys, workDataValues))
 
-    writeFilePath = './db/work.json'
+    writeFilePath = './logisticRegressionTest/db/work.json'
 
     with open(writeFilePath, 'w', encoding = 'utf-8') as makeFile:
         json.dump(workData, makeFile, ensure_ascii = False, indent = '\t')
@@ -74,10 +106,57 @@ def identifyWorker(scaler, model):
     print('time sleep 10sec')
     time.sleep(10)
 
+def dataGet():
+
+    print('Wait for 50sec to start dataGet')
+    time.sleep(50) 
+
+    vehicleWorkData = []
+    vehicleWorkRssi = []
+    rssi = []
+
+    readDataPath = './logisticRegressionTest/db/db.json'
+    dataFilePath = './logisticRegressionTest/db/data.csv'
+
+    with open(readDataPath, 'r', encoding = 'utf-8') as readData:
+        scanData = json.load(readData)
+    
+    vehicleWorkLength = len(scanData["vehicle"]["work"])
+
+    for i in range(vehicleWorkLength):
+        vehicleWorkData = scanData["vehicle"]["work"][i]
+        vehicleWorkRssi.append(vehicleWorkData['rssi'])
+        rssi.append(-(vehicleWorkRssi[i]))
+
+        file = open(dataFilePath,'a', newline='')
+        writeFile = csv.writer(file)
+        writeFile.writerow([rssi[i], 1])
+        file.close()
+    
+    print('close dataGet')
+
+def gridSearch():
+
+    model = LogisticRegression() 
+
+    params = {
+                'penalty' : ['l1', 'l2'],
+                'C': [0.01, 0.05, 0.1, 0.5, 1, 5, 10],
+                'solver':['saga', 'liblinear'],
+                'max_iter':[100, 500, 1000, 5000, 10000]
+            }
+
+    grid_search = GridSearchCV(model, param_grid = params, cv=5)
+
+    grid_search.fit(X_train, Y_train)
+    print(grid_search.best_params_)
+
 def main():
-    scaler, model = logisticRegression()
+    modelScore()
+    gridSearch()
     while(1):
-        identifyWorker(scaler, model)
+        identifyWorker()
+        dataGet()
 
 if __name__ == "__main__":
 	main()
