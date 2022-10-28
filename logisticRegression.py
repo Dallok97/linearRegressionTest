@@ -156,7 +156,7 @@ def main():
     gridSearch()
     while(1):
         identifyWorker()
-        dataGet()
+        #dataGet()
 
 if __name__ == "__main__":
 	main()
